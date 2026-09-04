@@ -1,0 +1,60 @@
+{
+  "name": "nces_acs_ed",
+  "type": "source",
+  "scripts": [
+    {
+      "path": "ingest.R",
+      "manual": false,
+      "last_run": "2026-09-03 17:01:32",
+      "frequency": 0,
+      "run_time": 246.95,
+      "last_status": {
+        "log": ["", "Attaching package: 'dplyr'", "", "The following objects are masked from 'package:stats':", "", "    filter, lag", "", "The following objects are masked from 'package:base':", "", "    intersect, setdiff, setequal, union", "", "=== vintage 2023", "  B01003: 1 cells, 13440 geographies", "  B05002: 2 cells, 13440 geographies", "  B09001: 8 cells, 13440 geographies", "  B11003: 3 cells, 13440 geographies", "  B14001: 7 cells, 13440 geographies", "  B14003: 18 cells, 13440 geographies", "  B14005: 7 cells, 13440 geographies", "  B15002: 33 cells, 13440 geographies", "  B16004: 17 cells, 13440 geographies", "  B17001: 26 cells, 13440 geographies", "  B17024: 24 cells, 13440 geographies", "  B18101: 4 cells, 13440 geographies", "  B19013: 1 cells, 13440 geographies", "  B23025: 2 cells, 13440 geographies", "  B25003: 2 cells, 13440 geographies", "  B27001: 23 cells, 13440 geographies", "  B28002: 4 cells, 13440 geographies", "wrote 795 state rows and 202075 district rows over 15 vintages"],
+        "success": true
+      }
+    }
+  ],
+  "checked": "2026-09-03 16:38:44",
+  "check_results": {
+    "data/nces_acs_ed/standard/data_lea.csv.gz": [],
+    "data/nces_acs_ed/standard/data_state.csv.gz": []
+  },
+  "standalone": false,
+  "raw_state": {
+    "raw/cells_2009.csv.xz": "eb696899e47db3f815919b8d9fb86e35",
+    "raw/cells_2010.csv.xz": "b280cbd2f0bac7078258383bc81dd94b",
+    "raw/cells_2011.csv.xz": "24ccde66ba4c74d1caba4de4bb176fd9",
+    "raw/cells_2012.csv.xz": "c53e843aab009350b4aca8387c647bc5",
+    "raw/cells_2013.csv.xz": "723eda170182dae947e66542d3ac2855",
+    "raw/cells_2014.csv.xz": "412328366b890ade72f2321e14f666ac",
+    "raw/cells_2015.csv.xz": "d6d2f4ead732b5067319d5ce1444a5c6",
+    "raw/cells_2016.csv.xz": "291bb498e25236191974d82a0eae2f37",
+    "raw/cells_2017.csv.xz": "a08316f7e2a67446f4f2cc7ca7eb8d8a",
+    "raw/cells_2018.csv.xz": "01118be3eab21e1c6be8b941163e388d",
+    "raw/cells_2019.csv.xz": "3f46e0a055a1389cf8bace423c328d77",
+    "raw/cells_2020.csv.xz": "7f05b575faaa5721dc716343d3e70334",
+    "raw/cells_2021.csv.xz": "170bc108edf39fcd688c8a8da5f6964f",
+    "raw/cells_2022.csv.xz": "4365faac56bdfad394c4c7c8f663a69f",
+    "raw/cells_2023.csv.xz": "726d1aef19b6797cf873d6a173395694",
+    "raw/codebook_2009.csv.xz": "bf12c28d2251097f572f5af398ef250c",
+    "raw/codebook_2010.csv.xz": "66fa8d4d12f688149c642fad52bc3dfa",
+    "raw/codebook_2011.csv.xz": "d71c65a531352d8fd49081a5814b1278",
+    "raw/codebook_2012.csv.xz": "3ef18c4f5e30e1d48478679f5d8c46e0",
+    "raw/codebook_2013.csv.xz": "4b28018abc9baa3dbe87a6867a427fdd",
+    "raw/codebook_2014.csv.xz": "8621edac78c42d18241cd5a96210e77d",
+    "raw/codebook_2015.csv.xz": "9beeb5ab283fb9b2640ee396f87515c3",
+    "raw/codebook_2016.csv.xz": "af59b39d529c39b6a53a89fcdde9b52c",
+    "raw/codebook_2017.csv.xz": "094cdb2311104beff038acca2d1ba177",
+    "raw/codebook_2018.csv.xz": "cda887c963f0fd904227fdd768a7369d",
+    "raw/codebook_2019.csv.xz": "d0e9474499ae88ca5fae85492cd58f88",
+    "raw/codebook_2020.csv.xz": "576a3a9a5c58f3851d2b8ff1ec029388",
+    "raw/codebook_2021.csv.xz": "e786a932ea1d8f50062b277c15cee3b5",
+    "raw/codebook_2022.csv.xz": "b9d7ca1e4c6e688012132487474fe667",
+    "raw/codebook_2023.csv.xz": "53d9773ea4d99ce754c877e19a5ddf5e"
+  },
+  "standard_state": {
+    "./data/nces_acs_ed/measure_info.json": "97b41e590cd55bc18039052f17faee76",
+    "./data/nces_acs_ed/standard/data_lea.csv.gz": "ccee05cdcb2cc8aedb006bf3f9adb3f5",
+    "./data/nces_acs_ed/standard/data_state.csv.gz": "b2331f37dad49ebd63b33a8095191c9b"
+  }
+}

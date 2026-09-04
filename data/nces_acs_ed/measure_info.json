@@ -1,0 +1,892 @@
+{
+  "geography": {
+    "id": "geography",
+    "name": "Location",
+    "short_name": "Location",
+    "long_name": "Location identifier",
+    "category": "identifier",
+    "short_description": "Identifies the state or school district a row describes.",
+    "long_description": "In data_state.csv.gz this is a FIPS code: \"00\" for national, otherwise a 2-digit state FIPS, including 11 for DC and 72 for Puerto Rico. In data_lea.csv.gz it is instead a 7-digit NCES LEAID identifying a school district, which is not a FIPS code; the containing state's FIPS is in the separate `state` column and is also the LEAID's first two digits. Together with `time` this is the primary key of each file.",
+    "measure_type": "id",
+    "unit": "FIPS code or NCES LEAID",
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "geography_name": {
+    "id": "geography_name",
+    "name": "Location name",
+    "short_name": "Location name",
+    "long_name": "Location name",
+    "category": "identifier",
+    "short_description": "Name of the state or school district.",
+    "long_description": "Name as published by NCES, with the trailing state name and postal abbreviation stripped, so \"A-C Central Community Unit School District 262, Illinois, IL\" becomes \"A-C Central Community Unit School District 262\". Names are refreshed with each vintage and are not stable across vintages; join on `geography` rather than on the name.",
+    "measure_type": "id",
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "state": {
+    "id": "state",
+    "name": "State",
+    "short_name": "State",
+    "long_name": "State FIPS code",
+    "category": "identifier",
+    "short_description": "FIPS code of the state containing the school district.",
+    "long_description": "2-digit state FIPS code, which is also the first two digits of the LEAID. Present in data_lea.csv.gz only, where it is the join key to state-level data, since `geography` there holds an LEAID rather than a FIPS code. Covers 52 values: the 50 states, DC and Puerto Rico.",
+    "measure_type": "id",
+    "unit": "FIPS code",
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "lea_type": {
+    "id": "lea_type",
+    "name": "District type",
+    "short_name": "District type",
+    "long_name": "School district type",
+    "category": "identifier",
+    "short_description": "Whether the district is elementary, secondary or unified.",
+    "long_description": "The three types are separate geographic layers that overlap one another: in dual-district states an elementary and a secondary district cover the same ground. Rows must therefore not be summed across types, and data_state.csv.gz should be used for totals. Present in data_lea.csv.gz only. In the 2019-2023 vintage there are 10,878 unified, 1,957 elementary and 480 secondary districts.",
+    "measure_type": "id",
+    "levels": {
+      "Elementary": { "name": "Elementary school district" },
+      "Secondary": { "name": "Secondary school district" },
+      "Unified": { "name": "Unified school district" }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "time": {
+    "id": "time",
+    "name": "Time",
+    "short_name": "Time",
+    "long_name": "Period end date",
+    "category": "identifier",
+    "short_description": "Last day of the final year of the ACS five-year period.",
+    "long_description": "Written as YYYY-12-31, so the 2019-2023 estimates carry 2023-12-31. This follows the repository convention of dating annual data to the end of its year, but note that each value summarises five years of sample, not the one year named.",
+    "measure_type": "time",
+    "unit": "Date",
+    "time_resolution": "Year",
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "period": {
+    "id": "period",
+    "name": "ACS period",
+    "short_name": "ACS period",
+    "long_name": "ACS five-year period",
+    "category": "identifier",
+    "short_description": "The five-year span the estimates cover, as ACS publishes it.",
+    "long_description": "For example \"2019-2023\". Kept alongside `time` because it is the label NCES and the Census Bureau use, and because it makes the five-year averaging explicit. Consecutive periods share four years of sample, so year-over-year differences are heavily autocorrelated and are not annual change. Fifteen periods are published, from 2005-2009 to 2019-2023.",
+    "measure_type": "id",
+    "unit": "Year range",
+    "time_resolution": "Year",
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_total{variant}": {
+    "id": "nces_pop_total{variant}",
+    "short_name": "Total population{variant.suffix}",
+    "long_name": "Total population{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Total population of the state or school district.",
+    "long_description": "Total population, from ACS table B01003.{variant.note}",
+    "statement": "{location} had a population of {value}.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": {
+        "suffix": " (margin of error)",
+        "note": " This column is the 90 percent margin of error of the estimate, and is empty far more often than the other margins here. ACS publishes \"*****\" instead of a margin of error wherever a population total is controlled to an independent estimate rather than sampled, which makes its sampling error zero by construction. That is true of every national and state row, so the column is entirely empty in data_state.csv.gz, and of districts coextensive with a controlled geography, which is why the largest districts (New York City, Puerto Rico) are empty too. Elsewhere in data_lea.csv.gz it is populated for 175,676 of 202,075 rows: the median district margin is 344 people, or about 6 percent of the estimate. The 2005-2009 vintage publishes no margins of error at all."
+      }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_under18{variant}": {
+    "id": "nces_pop_under18{variant}",
+    "short_name": "Children under 18{variant.suffix}",
+    "long_name": "Population under 18 years{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people under 18 years old.",
+    "long_description": "Population under 18 years, from ACS table B09001. Includes children in households and in group quarters.{variant.note}",
+    "statement": "{location} was home to {value} children under 18.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_age_0_4{variant}": {
+    "id": "nces_pop_age_0_4{variant}",
+    "short_name": "Children under 5{variant.suffix}",
+    "long_name": "Population under 5 years{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children under 5 years old, living in households.",
+    "long_description": "Sum of the 'Under 3 years' and '3 and 4 years' cells of ACS table B09001. B09001 breaks age down only within the 'In households' branch, so children in group quarters are excluded from this and the other B09001 age bands.{variant.note}",
+    "statement": "{location} was home to {value} children under 5.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_age_5_11{variant}": {
+    "id": "nces_pop_age_5_11{variant}",
+    "short_name": "Children 5 to 11{variant.suffix}",
+    "long_name": "Population 5 to 11 years{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children aged 5 to 11, living in households.",
+    "long_description": "Sum of the '5 years', '6 to 8 years' and '9 to 11 years' cells of ACS table B09001, which covers children in households only.{variant.note}",
+    "statement": "{location} was home to {value} children aged 5 to 11.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_age_12_17{variant}": {
+    "id": "nces_pop_age_12_17{variant}",
+    "short_name": "Children 12 to 17{variant.suffix}",
+    "long_name": "Population 12 to 17 years{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children aged 12 to 17, living in households.",
+    "long_description": "Sum of the '12 to 14 years' and '15 to 17 years' cells of ACS table B09001, which covers children in households only.{variant.note}",
+    "statement": "{location} was home to {value} children aged 12 to 17.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pop_age_16_19{variant}": {
+    "id": "nces_pop_age_16_19{variant}",
+    "short_name": "Teens 16 to 19{variant.suffix}",
+    "long_name": "Population 16 to 19 years{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people aged 16 to 19.",
+    "long_description": "Total of ACS table B14005, the universe for the high school completion measures.{variant.note}",
+    "statement": "{location} was home to {value} people aged 16 to 19.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_preschool{variant}": {
+    "id": "nces_enrolled_preschool{variant}",
+    "short_name": "Enrolled in preschool{variant.suffix}",
+    "long_name": "Enrolled in nursery school or preschool{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in nursery school or preschool.",
+    "long_description": "From ACS table B14001, school enrollment by level of school for the population 3 years and over.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in preschool.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_kindergarten{variant}": {
+    "id": "nces_enrolled_kindergarten{variant}",
+    "short_name": "Enrolled in kindergarten{variant.suffix}",
+    "long_name": "Enrolled in kindergarten{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in kindergarten.",
+    "long_description": "From ACS table B14001, school enrollment by level of school for the population 3 years and over.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in kindergarten.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_grade_1_4{variant}": {
+    "id": "nces_enrolled_grade_1_4{variant}",
+    "short_name": "Enrolled in grades 1-4{variant.suffix}",
+    "long_name": "Enrolled in grade 1 to grade 4{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in grades 1 through 4.",
+    "long_description": "From ACS table B14001, school enrollment by level of school for the population 3 years and over.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in grades 1 to 4.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_grade_5_8{variant}": {
+    "id": "nces_enrolled_grade_5_8{variant}",
+    "short_name": "Enrolled in grades 5-8{variant.suffix}",
+    "long_name": "Enrolled in grade 5 to grade 8{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in grades 5 through 8.",
+    "long_description": "From ACS table B14001, school enrollment by level of school for the population 3 years and over.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in grades 5 to 8.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_grade_9_12{variant}": {
+    "id": "nces_enrolled_grade_9_12{variant}",
+    "short_name": "Enrolled in grades 9-12{variant.suffix}",
+    "long_name": "Enrolled in grade 9 to grade 12{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in grades 9 through 12.",
+    "long_description": "From ACS table B14001, school enrollment by level of school for the population 3 years and over. This is the high school enrollment count that the completion and dropout measures should be read alongside.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in grades 9 to 12.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_k12{variant}": {
+    "id": "nces_enrolled_k12{variant}",
+    "short_name": "Enrolled in K-12{variant.suffix}",
+    "long_name": "Enrolled in kindergarten through grade 12{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in kindergarten through grade 12.",
+    "long_description": "Sum of the kindergarten, grade 1-4, grade 5-8 and grade 9-12 cells of ACS table B14001. Preschool and nursery school are excluded.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in kindergarten through grade 12.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_college{variant}": {
+    "id": "nces_enrolled_college{variant}",
+    "short_name": "Enrolled in college{variant.suffix}",
+    "long_name": "Enrolled in college, undergraduate or graduate{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of people enrolled in undergraduate, graduate or professional school.",
+    "long_description": "Sum of the 'Enrolled in college, undergraduate years' and 'Graduate or professional school' cells of ACS table B14001.{variant.note}",
+    "statement": "{value} people in {location} were enrolled in college.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_public_5_17{variant}": {
+    "id": "nces_enrolled_public_5_17{variant}",
+    "short_name": "In public school, 5-17{variant.suffix}",
+    "long_name": "Children 5 to 17 enrolled in public school{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children aged 5 to 17 enrolled in public school.",
+    "long_description": "Both sexes and the 5-9, 10-14 and 15-17 age bands of the 'Enrolled in public school' branch of ACS table B14003.{variant.note}",
+    "statement": "{value} children aged 5 to 17 in {location} attended public school.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_enrolled_private_5_17{variant}": {
+    "id": "nces_enrolled_private_5_17{variant}",
+    "short_name": "In private school, 5-17{variant.suffix}",
+    "long_name": "Children 5 to 17 enrolled in private school{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children aged 5 to 17 enrolled in private school.",
+    "long_description": "Both sexes and the 5-9, 10-14 and 15-17 age bands of the 'Enrolled in private school' branch of ACS table B14003.{variant.note}",
+    "statement": "{value} children aged 5 to 17 in {location} attended private school.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_enrolled_private_5_17{variant}": {
+    "id": "nces_pct_enrolled_private_5_17{variant}",
+    "short_name": "Private school share, 5-17{variant.suffix}",
+    "long_name": "Percent of enrolled children 5 to 17 attending private school{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Of children aged 5 to 17 who are in school, the percent in private school.",
+    "long_description": "Private school enrollment as a percent of public plus private enrollment for children aged 5 to 17, from ACS table B14003. Children not enrolled in school are excluded from the denominator.{variant.note}",
+    "statement": "{value} of enrolled children aged 5 to 17 in {location} attended private school.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_not_enrolled_5_17{variant}": {
+    "id": "nces_pct_not_enrolled_5_17{variant}",
+    "short_name": "Not in school, 5-17{variant.suffix}",
+    "long_name": "Percent of children 5 to 17 not enrolled in school{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children aged 5 to 17 who are not enrolled in school.",
+    "long_description": "Children aged 5 to 17 not enrolled in school as a percent of all children aged 5 to 17, from ACS table B14003.{variant.note}",
+    "statement": "{value} of children aged 5 to 17 in {location} were not enrolled in school.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_not_enrolled_hs_grad_16_19{variant}": {
+    "id": "nces_not_enrolled_hs_grad_16_19{variant}",
+    "short_name": "Left school with diploma, 16-19{variant.suffix}",
+    "long_name": "Teens 16 to 19 not enrolled who hold a high school credential{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of 16 to 19 year olds who have left school holding a diploma or equivalency.",
+    "long_description": "Both sexes of the 'Not enrolled in school: High school graduate (includes equivalency)' cells of ACS table B14005. GED and other equivalency credentials count as graduating here, which is not true of the cohort graduation rates NCES publishes from EDFacts.{variant.note}",
+    "statement": "{value} people aged 16 to 19 in {location} had left school with a high school credential.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_not_enrolled_no_hs_16_19{variant}": {
+    "id": "nces_not_enrolled_no_hs_16_19{variant}",
+    "short_name": "Left school without diploma, 16-19{variant.suffix}",
+    "long_name": "Teens 16 to 19 not enrolled and not a high school graduate{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of 16 to 19 year olds who have left school without a diploma or equivalency.",
+    "long_description": "Both sexes of the 'Not enrolled in school: Not high school graduate' cells of ACS table B14005.{variant.note}",
+    "statement": "{value} people aged 16 to 19 in {location} had left school without a high school credential.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_hs_grad_16_19{variant}": {
+    "id": "nces_pct_hs_grad_16_19{variant}",
+    "short_name": "High school completion, 16-19{variant.suffix}",
+    "long_name": "Percent of 16 to 19 year olds who have left school holding a high school credential{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Of 16 to 19 year olds who have left school, the percent holding a diploma or equivalency.",
+    "long_description": "High school graduates as a percent of all 16 to 19 year olds no longer enrolled in school, from ACS table B14005. This is a survey-based completion measure, not the Adjusted Cohort Graduation Rate: it counts equivalency credentials as completion, it is a five-year average over a four-year age range rather than a single cohort followed to graduation, and it is tabulated by where a teenager lives rather than by the school they attended. For the cohort rate, see the NCES EDFacts and Common Core of Data collections.{variant.note}",
+    "statement": "{value} of 16 to 19 year olds in {location} who had left school held a high school credential.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_dropout_16_19{variant}": {
+    "id": "nces_pct_dropout_16_19{variant}",
+    "short_name": "Status dropout rate, 16-19{variant.suffix}",
+    "long_name": "Percent of 16 to 19 year olds not enrolled and not a high school graduate{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of all 16 to 19 year olds who are neither enrolled in school nor holding a high school credential.",
+    "long_description": "Teens who have left school without a credential as a percent of all 16 to 19 year olds, from ACS table B14005. This follows the status dropout rate that NCES reports from the ACS, except that the published national series uses ages 16 to 24; here the denominator is the 16 to 19 universe the school district tables provide.{variant.note}",
+    "statement": "{value} of 16 to 19 year olds in {location} were neither in school nor high school graduates.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_enrolled_16_19{variant}": {
+    "id": "nces_pct_enrolled_16_19{variant}",
+    "short_name": "Still in school, 16-19{variant.suffix}",
+    "long_name": "Percent of 16 to 19 year olds enrolled in school{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of 16 to 19 year olds still enrolled in school.",
+    "long_description": "Both sexes of the 'Enrolled in school' cells of ACS table B14005 as a percent of all 16 to 19 year olds. Enrollment here includes college.{variant.note}",
+    "statement": "{value} of 16 to 19 year olds in {location} were still enrolled in school.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_hs_or_higher_25plus{variant}": {
+    "id": "nces_pct_hs_or_higher_25plus{variant}",
+    "short_name": "Adults with a diploma{variant.suffix}",
+    "long_name": "Percent of adults 25 and over with at least a high school credential{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of adults 25 and over who hold at least a high school diploma or equivalency.",
+    "long_description": "Everyone at or above the diploma level, both sexes, as a percent of the population 25 years and over, from ACS table B15002.{variant.note}",
+    "statement": "{value} of adults in {location} held at least a high school credential.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_no_hs_25plus{variant}": {
+    "id": "nces_pct_no_hs_25plus{variant}",
+    "short_name": "Adults without a diploma{variant.suffix}",
+    "long_name": "Percent of adults 25 and over with no high school credential{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of adults 25 and over who never completed high school.",
+    "long_description": "Everyone below the diploma level, from no schooling through 12th grade with no diploma, both sexes, as a percent of the population 25 years and over, from ACS table B15002.{variant.note}",
+    "statement": "{value} of adults in {location} had no high school credential.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_ba_or_higher_25plus{variant}": {
+    "id": "nces_pct_ba_or_higher_25plus{variant}",
+    "short_name": "Adults with a bachelor's{variant.suffix}",
+    "long_name": "Percent of adults 25 and over with a bachelor's degree or higher{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of adults 25 and over holding at least a bachelor's degree.",
+    "long_description": "Bachelor's, master's, professional school and doctorate degrees, both sexes, as a percent of the population 25 years and over, from ACS table B15002.{variant.note}",
+    "statement": "{value} of adults in {location} held a bachelor's degree or higher.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_non_english_home_5_17{variant}": {
+    "id": "nces_pct_non_english_home_5_17{variant}",
+    "short_name": "Non-English at home, 5-17{variant.suffix}",
+    "long_name": "Percent of children 5 to 17 speaking a language other than English at home{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children aged 5 to 17 who speak a language other than English at home.",
+    "long_description": "The Spanish, other Indo-European, Asian and Pacific Island, and other language groups as a percent of all children aged 5 to 17, from ACS table B16004. Says nothing about English proficiency on its own.{variant.note}",
+    "statement": "{value} of children aged 5 to 17 in {location} spoke a language other than English at home.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_limited_english_5_17{variant}": {
+    "id": "nces_pct_limited_english_5_17{variant}",
+    "short_name": "Limited English, 5-17{variant.suffix}",
+    "long_name": "Percent of children 5 to 17 speaking English less than very well{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children aged 5 to 17 who speak English less than very well.",
+    "long_description": "Children who speak English 'well', 'not well' or 'not at all', across all language groups, as a percent of all children aged 5 to 17, from ACS table B16004. This is the Census Bureau's limited-English-proficiency convention: 'very well' is excluded, so the measure is a household-survey analogue of an English learner count rather than a school program count.{variant.note}",
+    "statement": "{value} of children aged 5 to 17 in {location} spoke English less than very well.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_poverty_under18{variant}": {
+    "id": "nces_poverty_under18{variant}",
+    "short_name": "Children in poverty{variant.suffix}",
+    "long_name": "Children under 18 with income below the poverty level{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Number of children under 18 living below the federal poverty level.",
+    "long_description": "Both sexes and all age bands under 18 of the 'below poverty level' branch of ACS table B17001. The universe is people for whom poverty status is determined, which excludes some people in group quarters.{variant.note}",
+    "statement": "{value} children in {location} lived below the poverty level.",
+    "measure_type": "Count",
+    "unit": "People",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error of the estimate." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_poverty_under18{variant}": {
+    "id": "nces_pct_poverty_under18{variant}",
+    "short_name": "Child poverty rate{variant.suffix}",
+    "long_name": "Percent of children under 18 with income below the poverty level{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children under 18 living below the federal poverty level.",
+    "long_description": "Children under 18 below the poverty level as a percent of all children under 18 for whom poverty status is determined, from ACS table B17001.{variant.note}",
+    "statement": "{value} of children in {location} lived below the poverty level.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_poverty_all_ages{variant}": {
+    "id": "nces_pct_poverty_all_ages{variant}",
+    "short_name": "Poverty rate, all ages{variant.suffix}",
+    "long_name": "Percent of people of all ages with income below the poverty level{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of people of all ages living below the federal poverty level.",
+    "long_description": "The 'below poverty level' total of ACS table B17001 as a percent of the table total, the population for whom poverty status is determined.{variant.note}",
+    "statement": "{value} of people in {location} lived below the poverty level.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_deep_poverty_under18{variant}": {
+    "id": "nces_pct_deep_poverty_under18{variant}",
+    "short_name": "Children under 50% FPL{variant.suffix}",
+    "long_name": "Percent of children under 18 with income below 50 percent of the poverty level{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children under 18 living below half the federal poverty level.",
+    "long_description": "The 'Under .50' income-to-poverty band for the under 6, 6 to 11 and 12 to 17 age groups of ACS table B17024, as a percent of those age groups. B17024 bands ages differently from B17001, so this rate and the child poverty rate rest on slightly different universes.{variant.note}",
+    "statement": "{value} of children in {location} lived below half the poverty level.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_under185_fpl_under18{variant}": {
+    "id": "nces_pct_under185_fpl_under18{variant}",
+    "short_name": "Children under 185% FPL{variant.suffix}",
+    "long_name": "Percent of children under 18 with income below 185 percent of the poverty level{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children under 18 in households below 185 percent of the federal poverty level.",
+    "long_description": "Income-to-poverty bands from 'Under .50' through '1.75 to 1.84' for the under 6, 6 to 11 and 12 to 17 age groups of ACS table B17024, as a percent of those age groups. 185 percent is the income ceiling for reduced-price school meals, so this approximates the share of children income-eligible for them; the published bands stop at 1.84 rather than 1.85.{variant.note}",
+    "statement": "{value} of children in {location} lived below 185 percent of the poverty level.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_median_household_income{variant}": {
+    "id": "nces_median_household_income{variant}",
+    "short_name": "Median household income{variant.suffix}",
+    "long_name": "Median household income in the past 12 months{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Median household income over the past 12 months, in dollars of the vintage's final year.",
+    "long_description": "ACS table B19013. Dollars are inflation-adjusted to the last year of each five-year period, so values are not directly comparable across vintages without deflating to a common year. Districts where the median falls outside the published income brackets are left missing.{variant.note}",
+    "statement": "The median household income in {location} was {value}.",
+    "measure_type": "Median",
+    "unit": "Dollars",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error published with the median." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_median_household_income_bound": {
+    "id": "nces_median_household_income_bound",
+    "short_name": "Median income bracket flag",
+    "long_name": "Whether the median household income fell outside the published brackets",
+    "category": "demographic",
+    "short_description": "Says whether the median household income is a usable number, or known only to be above or below the published range.",
+    "long_description": "\"within\" where nces_median_household_income holds a usable value; \"top\" where ACS reported the median as \"$250,000+\"; \"bottom\" where it reported \"$2,500-\"; and empty where the median is missing for some other reason. For \"top\" and \"bottom\" the estimate itself is NA, because the true median is known only to lie beyond the bracket: at least $250,000, or at most $2,500. Use this column to tell a genuinely missing median apart from a very high or very low one, and to substitute the bracket bound if your analysis needs a number. Top-coded rows are rare but growing as incomes rise, from 2 districts in the 2006-2010 vintage to 37 in 2019-2023; bottom-coded rows never exceed 5.",
+    "statement": "The median household income in {location} was {value} the published range.",
+    "measure_type": "category",
+    "unit": "",
+    "time_resolution": "Year",
+    "levels": {
+      "within": { "name": "Within the published range" },
+      "top": { "name": "At least $250,000" },
+      "bottom": { "name": "At most $2,500" }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_uninsured_children{variant}": {
+    "id": "nces_pct_uninsured_children{variant}",
+    "short_name": "Uninsured children{variant.suffix}",
+    "long_name": "Percent of children without health insurance coverage{variant.suffix}",
+    "category": "access",
+    "short_description": "Percent of children with no health insurance coverage.",
+    "long_description": "Children with no health insurance coverage as a percent of all children, both sexes, from ACS table B27001. The age range shifts with the table: it is under 18 through the 2012-2016 vintage and under 19 from 2013-2017 onward, because the second age band was relabelled from '6 to 17 years' to '6 to 18 years'. The universe is the civilian noninstitutionalized population.{variant.note}",
+    "statement": "{value} of children in {location} had no health insurance.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_uninsured_all_ages{variant}": {
+    "id": "nces_pct_uninsured_all_ages{variant}",
+    "short_name": "Uninsured, all ages{variant.suffix}",
+    "long_name": "Percent of people of all ages without health insurance coverage{variant.suffix}",
+    "category": "access",
+    "short_description": "Percent of people of all ages with no health insurance coverage.",
+    "long_description": "All 'No health insurance coverage' cells of ACS table B27001 as a percent of the table total. The universe is the civilian noninstitutionalized population.{variant.note}",
+    "statement": "{value} of people in {location} had no health insurance.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_disability_5_17{variant}": {
+    "id": "nces_pct_disability_5_17{variant}",
+    "short_name": "Disability, 5-17{variant.suffix}",
+    "long_name": "Percent of children 5 to 17 with a disability{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of children aged 5 to 17 reported to have a disability.",
+    "long_description": "Children aged 5 to 17 with a disability, both sexes, as a percent of all children aged 5 to 17, from ACS table B18101. Disability is self- or proxy-reported across six functional questions and does not correspond to special education eligibility. First published in the 2008-2012 vintage.{variant.note}",
+    "statement": "{value} of children aged 5 to 17 in {location} had a disability.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_single_parent_families{variant}": {
+    "id": "nces_pct_single_parent_families{variant}",
+    "short_name": "Single-parent families{variant.suffix}",
+    "long_name": "Percent of families with children headed by one parent{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Of families with their own children under 18, the percent with no spouse present.",
+    "long_description": "Male- and female-householder families with no spouse present and with own children under 18, as a percent of all families with own children under 18, from ACS table B11003. Families without children are excluded from the denominator.{variant.note}",
+    "statement": "{value} of families with children in {location} were headed by one parent.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_unemployed{variant}": {
+    "id": "nces_pct_unemployed{variant}",
+    "short_name": "Unemployment rate{variant.suffix}",
+    "long_name": "Percent of the civilian labor force unemployed{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Unemployed people as a percent of the civilian labor force aged 16 and over.",
+    "long_description": "ACS table B23025. The denominator is the civilian labor force, so people not in the labor force and the armed forces are excluded. First published in the 2007-2011 vintage.{variant.note}",
+    "statement": "The unemployment rate in {location} was {value}.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_renter_occupied{variant}": {
+    "id": "nces_pct_renter_occupied{variant}",
+    "short_name": "Renter-occupied homes{variant.suffix}",
+    "long_name": "Percent of occupied housing units that are renter occupied{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of occupied housing units occupied by renters.",
+    "long_description": "ACS table B25003. Vacant units are excluded from the denominator.{variant.note}",
+    "statement": "{value} of occupied homes in {location} were rented.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_foreign_born{variant}": {
+    "id": "nces_pct_foreign_born{variant}",
+    "short_name": "Foreign born{variant.suffix}",
+    "long_name": "Percent of the population that is foreign born{variant.suffix}",
+    "category": "demographic",
+    "short_description": "Percent of people born outside the United States to non-U.S. citizen parents.",
+    "long_description": "The 'Foreign born' branch of ACS table B05002 as a percent of the total population. Includes naturalized citizens and non-citizens, and excludes people born abroad to American parents and those born in Puerto Rico or the U.S. Island Areas.{variant.note}",
+    "statement": "{value} of people in {location} were foreign born.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_no_internet{variant}": {
+    "id": "nces_pct_no_internet{variant}",
+    "short_name": "No internet subscription{variant.suffix}",
+    "long_name": "Percent of households without an internet subscription{variant.suffix}",
+    "category": "access",
+    "short_description": "Percent of households with no internet subscription of any kind.",
+    "long_description": "Households with internet access but no subscription, plus households with no internet access, as a percent of all households, from ACS table B28002. First published in the 2013-2017 vintage.{variant.note}",
+    "statement": "{value} of households in {location} had no internet subscription.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "nces_pct_broadband{variant}": {
+    "id": "nces_pct_broadband{variant}",
+    "short_name": "Broadband{variant.suffix}",
+    "long_name": "Percent of households with a broadband subscription{variant.suffix}",
+    "category": "access",
+    "short_description": "Percent of households with a broadband internet subscription of any type.",
+    "long_description": "The 'Broadband of any type' cell of ACS table B28002 as a percent of all households. Cellular data plans count as broadband here. First published in the 2013-2017 vintage.{variant.note}",
+    "statement": "{value} of households in {location} had a broadband subscription.",
+    "measure_type": "Percent",
+    "unit": "Percent",
+    "time_resolution": "Year",
+    "variants": {
+      "blank": { "suffix": "", "note": "" },
+      "_moe": { "suffix": " (margin of error)", "note": " This column is the 90 percent margin of error, derived with the Census Bureau's formula for the margin of error of a proportion." }
+    },
+    "sources": [{ "id": "nces_acs_ed" }]
+  },
+
+  "_sources": {
+    "nces_acs_ed": {
+      "name": "NCES ACS-ED Tables",
+      "url": "https://nces.ed.gov/programs/edge/Demographic/acsedtables",
+      "organization": "National Center for Education Statistics, Education Demographic and Geographic Estimates (EDGE) program",
+      "organization_url": "https://nces.ed.gov/programs/edge/",
+      "location": "EDGE TableViewer, ACS dataset",
+      "location_url": "https://nces.ed.gov/programs/edge/TableViewer/acs/2023",
+      "description": "The EDGE program has the Census Bureau retabulate American Community Survey five-year period estimates onto school district boundaries, producing social, economic and housing indicators for school-age children and their families at national, state and school district level. Fifteen vintages are published, from 2005-2009 through 2019-2023, each covering roughly 13,400 elementary, secondary and unified districts alongside the 50 states, DC and Puerto Rico. Because these are five-year survey averages for small areas, district-level margins of error are often large relative to the estimates and consecutive vintages share four years of sample, so year-over-year changes are heavily autocorrelated and should not be read as annual change. District boundaries are refreshed each year, so a district's geography is not necessarily constant across vintages. This source carries the survey-based measures of high school completion and dropout; the Adjusted Cohort Graduation Rate, which follows a single cohort to graduation and is reported by school rather than by residence, comes from the separate NCES EDFacts and Common Core of Data collections and is not part of these tables.",
+      "restrictions": "Public domain. NCES and Census Bureau data are generally not subject to copyright restrictions.",
+      "date_accessed": 2026
+    }
+  },
+
+  "_catalog": {
+    "summary": "The ACS-ED tables describe children and families in every U.S. school district, covering school enrollment, child poverty, language, health insurance and high school completion.",
+    "search_terms": [
+      "Education",
+      "school districts",
+      "school enrollment",
+      "child poverty",
+      "graduation"
+    ],
+    "bucket": [],
+    "files": {
+      "data_state.csv.gz": "National and state indicators",
+      "data_lea.csv.gz": "School district indicators by district type"
+    }
+  }
+}

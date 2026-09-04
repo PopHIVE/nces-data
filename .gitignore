@@ -1,0 +1,22 @@
+*.Rproj
+.Rproj.user
+*.Rprofile
+*.Rhistory
+*.Rdata
+.DS_Store
+renv
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# Bulk raw extracts. These are a download cache, not source data: each source's
+# ingest.R rebuilds any that are missing. Excluded because they dominate the
+# repo (77 MB for nces_acs_ed against 35 MB of standardized output) and are
+# rewritten whenever a vintage is refreshed. Rebuilding nces_acs_ed's takes
+# roughly 50 minutes of EDGE API calls -- see data/nces_acs_ed/README.md.
+#
+# The codebook_*.csv.xz files alongside them are deliberately NOT ignored: they
+# total 85 KB and record every ACS cell's label and ancestor path per vintage,
+# which is what the ingest matches against and what you read when a measure
+# comes out NA for a vintage.
+data/nces_acs_ed/raw/cells_*.csv.xz
